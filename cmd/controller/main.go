@@ -35,7 +35,11 @@ func main() {
 	if s := os.Getenv("HCLOUD_VOLUME_DEFAULT_LOCATION"); s != "" {
 		location = s
 	} else {
-		metadataClient := metadata.NewClient(metadata.WithInstrumentation(m.Registry()))
+		opts := []metadata.ClientOption{metadata.WithInstrumentation(m.Registry())}
+		if s := os.Getenv("HCLOUD_METADATA_ENDPOINT"); s != "" {
+			opts = append(opts, metadata.WithEndpoint(s))
+		}
+		metadataClient := metadata.NewClient(opts...)
 
 		if !metadataClient.IsHcloudServer() {
 			level.Warn(logger).Log("msg", "Unable to connect to metadata service. "+

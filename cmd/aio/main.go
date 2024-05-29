@@ -33,7 +33,11 @@ func main() {
 		os.Exit(1)
 	}
 
-	metadataClient := metadata.NewClient(metadata.WithInstrumentation(m.Registry()))
+	opts := []metadata.ClientOption{metadata.WithInstrumentation(m.Registry())}
+	if s := os.Getenv("HCLOUD_METADATA_ENDPOINT"); s != "" {
+		opts = append(opts, metadata.WithEndpoint(s))
+	}
+	metadataClient := metadata.NewClient(opts...)
 
 	if !metadataClient.IsHcloudServer() {
 		level.Warn(logger).Log("msg", "unable to connect to metadata service, are you sure this is running on a Hetzner Cloud server?")
