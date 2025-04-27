@@ -484,6 +484,25 @@ node:
     ##
     annotations: {}
 
+  ## RBAC configuration
+  ##
+  rbac:
+    ## @param node.rbac.create Specifies whether RBAC resources should be created
+    ##
+    create: true
+    ## @param node.rbac.rules Custom RBAC rules to set
+    ## e.g:
+    ## rules:
+    ##   - apiGroups:
+    ##       - ""
+    ##     resources:
+    ##       - pods
+    ##     verbs:
+    ##       - get
+    ##       - list
+    ##
+    rules: []
+
   ## Configure extra options for node containers' liveness and readiness probes
   ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-probes/#configure-probes
   ## @param node.livenessProbe.enabled Enable livenessProbe on node containers

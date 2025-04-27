@@ -28,25 +28,43 @@ func main() {
 		logger.Warn("unable to connect to metadata service, are you sure this is running on a Hetzner Cloud server?")
 	}
 
-	serverID, err := metadataClient.InstanceID()
+	isSet, serverID, err := app.GetServerIDFromEnv()
 	if err != nil {
-		logger.Error("failed to fetch server ID from metadata service", "err", err)
+		logger.Error("unable to get server ID from env", "err", err)
 		os.Exit(1)
+	}
+	if !isSet {
+		serverID, err = metadataClient.InstanceID()
+		if err != nil {
+			logger.Error("failed to fetch server ID from metadata service", "err", err)
+			os.Exit(1)
+		}
+		logger.Info("Fetched data from metadata service", "id", serverID)
+	} else {
+		logger.Info("Fetched data from env", "id", serverID)
 	}
 
-	serverAZ, err := metadataClient.AvailabilityZone()
+	isSet, serverLocation, err := app.GetServerLocationFromEnv()
 	if err != nil {
-		logger.Error("failed to fetch server availability-zone from metadata service", "err", err)
+		logger.Error("unable to get server location from env", "err", err)
 		os.Exit(1)
 	}
-	parts := strings.Split(serverAZ, "-")
-	if len(parts) != 2 {
-		logger.Error(fmt.Sprintf("unexpected server availability zone: %s", serverAZ), "err", err)
-		os.Exit(1)
+	if !isSet {
+		serverAZ, err := metadataClient.AvailabilityZone()
+		if err != nil {
+			logger.Error("failed to fetch server availability-zone from metadata service", "err", err)
+			os.Exit(1)
+		}
+		parts := strings.Split(serverAZ, "-")
+		if len(parts) != 2 {
+			logger.Error(fmt.Sprintf("unexpected server availability zone: %s", serverAZ), "err", err)
+			os.Exit(1)
+		}
+		serverLocation = parts[0]
+		logger.Info("Fetched data from metadata service", "location", serverLocation)
+	} else {
+		logger.Info("Fetched data from env", "location", serverLocation)
 	}
-	serverLocation := parts[0]
-
-	logger.Info("Fetched data from metadata service", "id", serverID, "location", serverLocation)
 
 	volumeMountService := volumes.NewLinuxMountService(logger.With("component", "linux-mount-service"))
 	volumeResizeService := volumes.NewLinuxResizeService(logger.With("component", "linux-resize-service"))

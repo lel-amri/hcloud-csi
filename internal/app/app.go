@@ -192,15 +192,33 @@ func GetServerLocation(logger *slog.Logger, hcloudClient *hcloud.Client, metadat
 	return getLocationFromMetadata(logger, metadataClient)
 }
 
-func getLocationByEnvID(logger *slog.Logger, hcloudClient *hcloud.Client) (bool, string, error) {
+func GetServerIDFromEnv() (bool, int64, error) {
 	envID := os.Getenv("HCLOUD_SERVER_ID")
 	if envID == "" {
-		return false, "", nil
+		return false, 0, nil
 	}
 
 	id, err := strconv.ParseInt(envID, 10, 64)
 	if err != nil {
-		return true, "", fmt.Errorf("invalid server id in HCLOUD_SERVER_ID env var: %s", envID)
+		return true, 0, fmt.Errorf("invalid server id in HCLOUD_SERVER_ID env var: %s", envID)
+	}
+
+	return true, id, nil
+}
+
+func GetServerLocationFromEnv() (bool, string, error) {
+	envLocation := os.Getenv("HCLOUD_SERVER_LOCATION")
+	if envLocation == "" {
+		return false, "", nil
+	}
+
+	return true, envLocation, nil
+}
+
+func getLocationByEnvID(logger *slog.Logger, hcloudClient *hcloud.Client) (bool, string, error) {
+	isSet, id, err := GetServerIDFromEnv()
+	if !isSet || err != nil {
+		return isSet, "", err
 	}
 
 	logger.Debug(

@@ -1,4 +1,4 @@
-FROM alpine:3.21
+FROM alpine:3.21 as base
 
 RUN apk add --no-cache \
     blkid \
@@ -12,3 +12,11 @@ RUN apk add --no-cache \
 
 COPY ./controller.bin /bin/hcloud-csi-driver-controller
 COPY ./node.bin /bin/hcloud-csi-driver-node
+
+FROM base AS kubernetes
+
+RUN apk add --no-cache \
+    curl \
+    jq
+
+COPY ./entrypoint.sh /entrypoint.sh

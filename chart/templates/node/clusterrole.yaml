@@ -1,0 +1,21 @@
+{{ if .Values.node.rbac.create }}
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: {{ include "common.names.fullname" . }}-node
+  labels: {{- include "common.labels.standard" . | nindent 4 }}
+    app.kubernetes.io/component: node
+    {{- if .Values.commonLabels }}
+    {{- include "common.tplvalues.render" ( dict "value" .Values.commonLabels "context" $ ) | nindent 4 }}
+    {{- end }}
+  {{- if .Values.commonAnnotations }}
+  annotations: {{- include "common.tplvalues.render" ( dict "value" .Values.commonAnnotations "context" $ ) | nindent 4 }}
+  {{- end }}
+rules:
+  - apiGroups: [""]
+    resources: [nodes]
+    verbs: [get]
+{{- if .Values.node.rbac.rules }}
+{{- include "common.tplvalues.render" ( dict "value" .Values.node.rbac.rules "context" $ ) | nindent 2 }}
+{{- end }}
+{{- end }}

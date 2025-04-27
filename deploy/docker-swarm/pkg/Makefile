@@ -9,7 +9,7 @@ clean:
 	@docker container rm -vf tmp_plugin_build_${ARCH} || true
 
 rootfs: clean
-	docker image build --platform=linux/${ARCH} -f Dockerfile -t ${PLUGIN_NAME}:rootfs-${ARCH} ../../../
+	docker image build --platform=linux/${ARCH} -f Dockerfile --target=base -t ${PLUGIN_NAME}:rootfs-${ARCH} ../../../
 	mkdir -p ./plugin/rootfs
 	docker container create --name tmp_plugin_build_${ARCH} ${PLUGIN_NAME}:rootfs-${ARCH}
 	docker container export tmp_plugin_build_${ARCH} | tar -x -C ./plugin/rootfs
